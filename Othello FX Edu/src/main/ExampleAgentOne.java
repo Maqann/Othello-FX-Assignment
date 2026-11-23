@@ -1,12 +1,18 @@
 package main;
 
 import com.eudycontreras.othello.capsules.AgentMove;
+import com.eudycontreras.othello.capsules.ObjectiveWrapper;
 import com.eudycontreras.othello.controllers.AgentController;
 import com.eudycontreras.othello.controllers.Agent;
 import com.eudycontreras.othello.enumerations.PlayerTurn;
 import com.eudycontreras.othello.models.GameBoardState;
 import com.eudycontreras.othello.threading.ThreadManager;
 import com.eudycontreras.othello.threading.TimeSpan;
+import com.eudycontreras.othello.utilities.GameTreeUtility;
+
+import java.util.List;
+
+import static com.eudycontreras.othello.utilities.GameTreeUtility.getCounterPlayer;
 
 /**
  * <H2>Created by</h2> Eudy Contreras
@@ -20,8 +26,8 @@ import com.eudycontreras.othello.threading.TimeSpan;
  * @author Eudy Contreras
  */
 public class ExampleAgentOne extends Agent{
-	
-	
+
+
 	public ExampleAgentOne() {
 		this(PlayerTurn.PLAYER_ONE);
 	}
@@ -32,7 +38,6 @@ public class ExampleAgentOne extends Agent{
 	
 	public ExampleAgentOne(PlayerTurn playerTurn) {
 		super(playerTurn);
-	
 	}
 
 	/**
@@ -40,8 +45,40 @@ public class ExampleAgentOne extends Agent{
 	 */
 	@Override
 	public AgentMove getMove(GameBoardState gameState) {
+
+		int alpha;
+		int beta;
+
+		List<ObjectiveWrapper> availableMoves = AgentController.getAvailableMoves(gameState, playerTurn);
+		for (int i = 0; i < availableMoves.size(); i++) {
+			System.out.println(availableMoves.get(i));
+		}
+
+		if (availableMoves.isEmpty()) {
+			//return setPlayerTurn(getCounterPlayer());
+		}
+
+		ObjectiveWrapper bestMove = null;
+		double bestScore = Double.NEGATIVE_INFINITY;
+
+		for (ObjectiveWrapper move : availableMoves) {
+			GameBoardState next = AgentController.getNewState(gameState, move); // brädet efter draget
+			double score = evaluate(next);                                       // hur bra är det?
+			if (score > bestScore) {                                             // bättre än hittills?
+				bestScore = score;
+				bestMove = move;
+			}
+		}
 		return getExampleMove(gameState);
 	}
+
+	private double evaluate(GameBoardState state) {
+		double score = AgentController.getGameEvaluation(state, playerTurn);
+		// getGameEvaluation räknar alltid från spelare 1:s (vits) håll
+		return (playerTurn == PlayerTurn.PLAYER_ONE) ? score : -score;
+	}
+
+
 	
 	/**
 	 * Default template move which serves as an example of how to implement move

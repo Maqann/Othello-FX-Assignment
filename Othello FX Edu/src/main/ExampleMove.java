@@ -36,6 +36,9 @@ public class ExampleMove extends AgentMove{
 	 */
 	@Override
 	public int compareTo(AgentMove move) {
+
+
+
 		// TODO Auto-generated method stub
 		return 0;
 	}

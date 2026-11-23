@@ -132,6 +132,7 @@ public class MoveWrapper extends AgentMove{
 	@Override
 	public int compareTo(AgentMove otherMove) {
 		return Integer.compare(getMoveReward(), ((MoveWrapper) otherMove).getMoveReward());
+
 	}
 	
 }
