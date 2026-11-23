@@ -1,6 +1,7 @@
 package main;
 
 import com.eudycontreras.othello.capsules.AgentMove;
+import com.eudycontreras.othello.capsules.MoveWrapper;
 import com.eudycontreras.othello.capsules.ObjectiveWrapper;
 import com.eudycontreras.othello.controllers.AgentController;
 import com.eudycontreras.othello.controllers.Agent;
@@ -11,6 +12,7 @@ import com.eudycontreras.othello.threading.TimeSpan;
 import com.eudycontreras.othello.utilities.GameTreeUtility;
 
 import java.util.List;
+import java.util.Random;
 
 import static com.eudycontreras.othello.utilities.GameTreeUtility.getCounterPlayer;
 
@@ -45,41 +47,68 @@ public class ExampleAgentOne extends Agent{
 	 */
 	@Override
 	public AgentMove getMove(GameBoardState gameState) {
+		return testmove(gameState, playerTurn);
+	}
 
-		int alpha;
-		int beta;
 
-		List<ObjectiveWrapper> availableMoves = AgentController.getAvailableMoves(gameState, playerTurn);
-		for (int i = 0; i < availableMoves.size(); i++) {
-			System.out.println(availableMoves.get(i));
+	public double minimax(GameBoardState state, PlayerTurn playerTurn, int depth, double alpha, double beta) { // depth: "Hur mång drag framåt agenten tittar"
+
+		if (depth == 0) {
+			return AgentController.getGameEvaluation(state, this.playerTurn);
 		}
 
-		if (availableMoves.isEmpty()) {
-			//return setPlayerTurn(getCounterPlayer());
-		}
+		if (playerTurn == this.playerTurn) {
+			double value = Double.NEGATIVE_INFINITY;
+			List<ObjectiveWrapper> availableMoves = AgentController.getAvailableMoves(state, playerTurn);
+			for (int i = 0; i < availableMoves.size(); i++) {
 
-		ObjectiveWrapper bestMove = null;
-		double bestScore = Double.NEGATIVE_INFINITY;
+				ObjectiveWrapper move = availableMoves.get(i);
+				GameBoardState child = AgentController.getNewState(state, move);
+				PlayerTurn nextPlayer = GameTreeUtility.getCounterPlayer(playerTurn);
 
-		for (ObjectiveWrapper move : availableMoves) {
-			GameBoardState next = AgentController.getNewState(gameState, move); // brädet efter draget
-			double score = evaluate(next);                                       // hur bra är det?
-			if (score > bestScore) {                                             // bättre än hittills?
-				bestScore = score;
-				bestMove = move;
+				double score = minimax(child, nextPlayer, depth - 1, alpha, beta);
+				value = Math.max(alpha, score); //if sats, samma score > bestScore
+				alpha = Math.max(value, score);
+
+				if (value >= beta) {
+					break;
+				}
 			}
+			return value;
+
+		} else {
+
+			double value = Double.POSITIVE_INFINITY;
+			List<ObjectiveWrapper> availableMoves = AgentController.getAvailableMoves(state, playerTurn);
+			for (int i = 0; i < availableMoves.size(); i++) {
+
+				ObjectiveWrapper move = availableMoves.get(i);
+				GameBoardState child = AgentController.getNewState(state, move);
+				PlayerTurn nextPlayer = GameTreeUtility.getCounterPlayer(playerTurn);
+
+				double score = minimax(child, nextPlayer, depth - 1, alpha, beta);
+				value = Math.min(beta, score);
+				beta = Math.min(value, score);
+
+				if (value <= alpha) {
+					break;
+				}
+			}
+			return value;
 		}
-		return getExampleMove(gameState);
 	}
 
-	private double evaluate(GameBoardState state) {
-		double score = AgentController.getGameEvaluation(state, playerTurn);
-		// getGameEvaluation räknar alltid från spelare 1:s (vits) håll
-		return (playerTurn == PlayerTurn.PLAYER_ONE) ? score : -score;
+	/*
+	public static MoveWrapper testmove(GameBoardState gameState, PlayerTurn playerTurn) {
+
+			@Override
+					isValid
+		return new MoveWrapper(minimaxfuck);
+
+
 	}
+	*/
 
-
-	
 	/**
 	 * Default template move which serves as an example of how to implement move
 	 * making logic. Note that this method does not use Alpha beta pruning and

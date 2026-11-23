@@ -1,12 +1,15 @@
 package main;
 
 import com.eudycontreras.othello.capsules.AgentMove;
+import com.eudycontreras.othello.capsules.ObjectiveWrapper;
 import com.eudycontreras.othello.controllers.AgentController;
 import com.eudycontreras.othello.controllers.Agent;
 import com.eudycontreras.othello.enumerations.PlayerTurn;
 import com.eudycontreras.othello.models.GameBoardState;
 import com.eudycontreras.othello.threading.ThreadManager;
 import com.eudycontreras.othello.threading.TimeSpan;
+
+import java.util.List;
 
 /**
  * <H2>Created by</h2> Eudy Contreras
@@ -20,8 +23,6 @@ import com.eudycontreras.othello.threading.TimeSpan;
  * @author Eudy Contreras
  */
 public class ExampleAgentTwo extends Agent{
-	
-	
 	public ExampleAgentTwo() {
 		this(PlayerTurn.PLAYER_TWO);
 	}
@@ -38,9 +39,27 @@ public class ExampleAgentTwo extends Agent{
 	/**
 	 * Delete the content of this method and Implement your logic here!
 	 */
+
+	private static final int search_depth = 5;
+
+	private static final int time_limit = UserSettings.MAX_SEARCH_TIME;
+
+	private static final double win_weight = 1.0;
+
+
+
+
 	@Override
 	public AgentMove getMove(GameBoardState gameState) {
 		return getExampleMove(gameState);
+		setSearchDepth(search_depth);
+
+		List<ObjectiveWrapper> moves = AgentController.getAvailableMoves(gameState, playerTurn);
+
+		if(moves.isEmpty()){
+			return null;
+		}
+
 	}
 	
 	/**
